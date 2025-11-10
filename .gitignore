@@ -48,3 +48,6 @@ Thumbs.db
 .vscode/extensions.json 
 .vscode/*.code-workspace
 *.code-workspace
+
+# local
+setenv.sh

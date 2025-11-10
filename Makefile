@@ -1,4 +1,7 @@
-.PHONY: help setup init plan apply deploy destroy clean status ssh logs kubeconfig test
+ROOT_DIR=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+SHELL=/bin/bash
+
+.PHONY: help setup init plan apply deploy destroy clean status ssh logs kubeconfig test venv
 
 # Default target
 help:
@@ -17,6 +20,7 @@ help:
 	@echo "  make logs        - View K3s logs on control plane"
 	@echo "  make kubeconfig  - Export kubeconfig"
 	@echo "  make test        - Deploy test nginx application"
+	@echo "  make venv        - Setup project virtual environnment"
 	@echo ""
 
 setup:
@@ -101,3 +105,11 @@ info:
 	@echo "=== Node IPs ==="
 	@echo "Control Plane: $(shell terraform output -json control_plane_ips | jq -r '.[]')"
 	@echo "Workers: $(shell terraform output -json worker_ips | jq -r '.[]')"
+
+venv: requirements.txt requirements.yml
+	if [ ! -d .venv ]; then uv venv; fi && \
+	source .venv/bin/activate && \
+	uv pip install -U setuptools && \
+	uv pip install -r requirements.txt && \
+	.venv/bin/ansible-galaxy install -r requirements.yml
+
