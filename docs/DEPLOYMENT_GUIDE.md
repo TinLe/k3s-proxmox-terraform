@@ -600,7 +600,22 @@ helm repo update
 helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace
 ```
 
-### 5. Install Nginx Ingress
+### 5. Traefik Ingress Controller (Enabled by Default)
+
+Traefik is now enabled by default in K3s and provides:
+- Built-in ingress controller for routing HTTP/HTTPS traffic
+- Automatic SSL certificate management
+- Load balancing capabilities
+- Service discovery
+
+To verify Traefik is running:
+```bash
+kubectl get pods -n kube-system | grep traefik
+```
+
+### 6. Install Nginx Ingress (Alternative)
+
+If you prefer Nginx Ingress instead of Traefik:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml

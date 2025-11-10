@@ -29,15 +29,15 @@ setup:
 
 init:
 	@echo "Initializing Terraform..."
-	terraform init
+	cd terraform && terraform init
 
 plan: init
 	@echo "Planning deployment..."
-	terraform plan
+	cd terraform && terraform plan
 
 apply: init
 	@echo "Applying Terraform configuration..."
-	terraform apply
+	cd terraform && terraform apply
 
 deploy:
 	@echo "Running full deployment..."
@@ -45,7 +45,7 @@ deploy:
 
 destroy:
 	@echo "Destroying infrastructure..."
-	terraform destroy
+	cd terraform && terraform destroy
 
 clean:
 	@echo "Cleaning Terraform files..."
@@ -82,11 +82,11 @@ test:
 
 # Show Terraform outputs
 outputs:
-	@terraform output
+	@cd terraform && terraform output
 
 # Get K3s token
 token:
-	@terraform output -raw k3s_token
+	@cd terraform && terraform output -raw k3s_token
 
 # Ping all nodes
 ping:
@@ -100,11 +100,11 @@ ping:
 # Quick cluster info
 info:
 	@echo "=== Cluster Information ==="
-	@terraform output -json cluster_info | jq .
+	@cd terraform && terraform output -json cluster_info | jq .
 	@echo ""
 	@echo "=== Node IPs ==="
-	@echo "Control Plane: $(shell terraform output -json control_plane_ips | jq -r '.[]')"
-	@echo "Workers: $(shell terraform output -json worker_ips | jq -r '.[]')"
+	@echo "Control Plane: $(shell cd terraform && terraform output -json control_plane_ips | jq -r '.[]')"
+	@echo "Workers: $(shell cd terraform && terraform output -json worker_ips | jq -r '.[]')"
 
 venv: requirements.txt requirements.yml
 	if [ ! -d .venv ]; then uv venv; fi && \
@@ -112,4 +112,3 @@ venv: requirements.txt requirements.yml
 	uv pip install -U setuptools && \
 	uv pip install -r requirements.txt && \
 	.venv/bin/ansible-galaxy install -r requirements.yml
-

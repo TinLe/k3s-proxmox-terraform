@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     proxmox = {
       source  = "Telmate/proxmox"
@@ -45,11 +45,11 @@ resource "proxmox_vm_qemu" "k3s_control_plane" {
   clone       = var.template_id
   full_clone  = true
   vmid        = var.vm_id_start + count.index
-  
-  agent    = 1
-  os_type  = "cloud-init"
-  memory   = var.control_plane_memory
-  
+
+  agent   = 1
+  os_type = "cloud-init"
+  memory  = var.control_plane_memory
+
   cpu {
     type    = "host"
     cores   = var.control_plane_cpu
@@ -57,7 +57,7 @@ resource "proxmox_vm_qemu" "k3s_control_plane" {
   }
   scsihw   = "virtio-scsi-single"
   bootdisk = "scsi0"
-  
+
   onboot  = true
   startup = "order=1"
 
@@ -88,15 +88,15 @@ resource "proxmox_vm_qemu" "k3s_control_plane" {
 
   # Serial port for console access
   serial {
-    id = 0
+    id   = 0
     type = "socket"
   }
 
   ipconfig0 = "ip=${cidrhost("192.168.1.0/24", 180 + count.index)}/24,gw=${var.gateway}"
-  
-  nameserver    = var.nameserver
-  searchdomain  = var.searchdomain
-  
+
+  nameserver   = var.nameserver
+  searchdomain = var.searchdomain
+
   ciuser     = "ubuntu"
   cipassword = "ubuntu"
   sshkeys    = var.ssh_public_key
@@ -119,11 +119,11 @@ resource "proxmox_vm_qemu" "k3s_worker" {
   clone       = var.template_id
   full_clone  = true
   vmid        = var.vm_id_start + var.control_plane_count + count.index
-  
-  agent    = 1
-  os_type  = "cloud-init"
-  memory   = var.worker_memory
-  
+
+  agent   = 1
+  os_type = "cloud-init"
+  memory  = var.worker_memory
+
   cpu {
     type    = "host"
     cores   = var.worker_cpu
@@ -131,7 +131,7 @@ resource "proxmox_vm_qemu" "k3s_worker" {
   }
   scsihw   = "virtio-scsi-single"
   bootdisk = "scsi0"
-  
+
   onboot  = true
   startup = "order=2"
 
@@ -162,15 +162,15 @@ resource "proxmox_vm_qemu" "k3s_worker" {
 
   # Serial port for console access
   serial {
-    id = 0
+    id   = 0
     type = "socket"
   }
 
   ipconfig0 = "ip=${cidrhost("192.168.1.0/24", 185 + count.index)}/24,gw=${var.gateway}"
-  
-  nameserver    = var.nameserver
-  searchdomain  = var.searchdomain
-  
+
+  nameserver   = var.nameserver
+  searchdomain = var.searchdomain
+
   ciuser     = "ubuntu"
   cipassword = "ubuntu"
   sshkeys    = var.ssh_public_key

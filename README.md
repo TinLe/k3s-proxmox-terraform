@@ -104,7 +104,7 @@ kubectl port-forward svc/argocd-server -n argocd 8080:80
 
 # Access in browser: http://localhost:8080
 # Username: admin
-# Password: (check the ArgoCD secret or deployment output)
+# Password: $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)
 ```
 
 ## Manual Deployment (Step by Step)
@@ -183,10 +183,91 @@ k3s-proxmox-terraform/
 │   ├── k3s-install.yml          # K3s installation playbook
 │   ├── system-utils-install.yml # System utilities installation playbook
 │   └── argocd-install.yml       # ArgoCD installation playbook
+├── .github/workflows/           # GitHub Actions workflows
+│   ├── validate.yml             # Code validation workflow
+│   ├── release.yml              # Release automation workflow
+│   └── security.yml             # Security scanning workflow
 ├── deploy.sh                    # Automated deployment script
 ├── setup.sh                     # Setup script
+├── .yamllint.yml                # YAML linting configuration
 └── README.md                    # This file
 ```
+
+## GitHub Actions & CI/CD
+
+This project uses GitHub Actions for automated testing, security scanning, and release management.
+
+### Workflow Status
+
+[![Validate Code](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/validate.yml/badge.svg)](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/validate.yml)
+[![Security Scan](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/security.yml/badge.svg)](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/security.yml)
+
+### Development Workflow
+
+1. **Create a feature branch:**
+   ```bash
+   git checkout -b feature/new-feature
+   ```
+
+2. **Make your changes and commit:**
+   ```bash
+   git add .
+   git commit -m "Add new feature"
+   ```
+
+3. **Push and create a Pull Request:**
+   ```bash
+   git push origin feature/new-feature
+   ```
+
+4. **Automatic validation runs:**
+   - Terraform format and validation
+   - Ansible syntax and linting
+   - YAML validation
+   - Security scanning
+
+5. **After review, merge to main**
+
+### Release Process
+
+To create a new release:
+
+1. **Update version and commit:**
+   ```bash
+   git add .
+   git commit -m "Release v1.2.3"
+   ```
+
+2. **Create and push a tag:**
+   ```bash
+   git tag v1.2.3
+   git push --tags
+   ```
+
+3. **GitHub Actions automatically:**
+   - Creates a release with versioned archive
+   - Generates SHA256 and MD5 checksums
+   - Publishes release notes
+   - Makes the release immutable
+
+### Repository Settings
+
+For optimal security and workflow, configure these repository settings:
+
+1. **Enable release immutability:**
+   - Settings → Code and automation → Releases
+   - Check "Enable release immutability"
+
+2. **Protect the main branch:**
+   - Settings → Branches → Branch protection rules
+   - Require status checks to pass
+   - Require PR reviews before merging
+
+### Available Workflows
+
+- **Validate Code**: Runs on every PR and push to main
+- **Security Scan**: Runs weekly and on-demand
+- **Release Automation**: Runs when tags are created
 
 ## Customization
 
@@ -454,7 +535,7 @@ After deployment, you can:
 2. **Install a CNI plugin** (if not using default Flannel)
 3. **Deploy cert-manager** for TLS certificates
 4. **Install Helm** for package management
-5. **Setup Ingress Controller** (Nginx, Traefik)
+5. **Traefik Ingress Controller** (enabled by default)
 6. **Configure persistent storage** (Longhorn, NFS)
 7. **Setup monitoring** (Prometheus, Grafana)
 8. **Deploy applications** using ArgoCD or kubectl
@@ -466,6 +547,13 @@ Once ArgoCD is installed, you can:
 - Automatically deploy and sync applications
 - Monitor application health through the UI
 - Rollback to previous versions if needed
+
+### Traefik Ingress Controller
+Traefik is now enabled by default in K3s and provides:
+- Built-in ingress controller for routing HTTP/HTTPS traffic
+- Automatic SSL certificate management
+- Load balancing capabilities
+- Service discovery
 
 ## Resources
 

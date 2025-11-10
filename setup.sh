@@ -59,7 +59,7 @@ fi
 # Check SSH key
 if [ -f "$HOME/.ssh/id_ed25519.pub" ]; then
     echo -e "${GREEN}✓ SSH key found${NC}"
-    echo "  $(cat $HOME/.ssh/id_ed25519.pub)"
+    echo "  $(cat "$HOME/.ssh/id_ed25519.pub")"
 else
     echo -e "${YELLOW}✗ SSH key not found${NC}"
     echo "  Generate one with: ssh-keygen -t ed25519 -C 'k3s-cluster'"
@@ -89,4 +89,4 @@ echo "3. Run the deployment:"
 echo "   ./deploy.sh"
 echo ""
 echo -e "${GREEN}Files created:${NC}"
-ls -lh *.sh terraform/*.tf terraform/terraform.tfvars* ansible/*.yml 2>/dev/null || true
+ls -lh ./*.sh terraform/*.tf terraform/terraform.tfvars* ansible/*.yml 2>/dev/null || true
