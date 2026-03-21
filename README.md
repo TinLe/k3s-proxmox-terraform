@@ -1,6 +1,276 @@
-# K3s on Proxmox VE with Terraform
+# K3s on Proxmox VE
 
-This project deploys a K3s Kubernetes cluster on Proxmox VE using Terraform and Ansible.
+> **Automated Kubernetes Cluster Deployment using Terragrunt, OpenTofu, and Ansible**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![OpenTofu](https://img.shields.io/badge/OpenTofu-1.8+-844fba)](https://opentofu.org/)
+[![Terragrunt](https://img.shields.io/badge/Terragrunt-0.68+-5c6ac4)](https://terragrunt.gruntwork.io/)
+[![K3s](https://img.shields.io/badge/K3s-v1.34.1-326ce5)](https://k3s.io/)
+
+Deploy production-ready Kubernetes clusters on Proxmox VE with a single command. This project provides Infrastructure as Code (IaC) automation for K3s cluster provisioning using modern, open-source tools.
+
+## ✨ Features
+
+- 🚀 **One-Command Deployment** - Full cluster in <15 minutes
+- 🔄 **Multi-Environment** - Separate dev/prod configurations
+- 📦 **Modular Architecture** - Reusable Terragrunt modules
+- 🔒 **Secure by Default** - SSH keys, API tokens, encrypted secrets
+- 📊 **High Availability** - 3-node control plane for production
+- 🎯 **GitOps Ready** - Optional ArgoCD integration
+- ⚡ **Fast Package Management** - uv for Python dependencies
+- 📚 **Comprehensive Docs** - Architecture diagrams and guides
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Development Machine                       │
+│  ┌──────────┐  ┌──────────┐  ┌─────────┐  ┌──────────┐   │
+│  │Terragrunt│→ │ OpenTofu │→ │ Ansible │→ │   K3s    │   │
+│  └──────────┘  └──────────┘  └─────────┘  └──────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                      Proxmox VE Host                         │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Dev: 1 CP + 3 Workers (5 vCPU, 10GB RAM)             │ │
+│  │  Prod: 3 CP + 5 Workers (22 vCPU, 44GB RAM) - HA      │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**[View Detailed Architecture →](docs/architecture/README.md)**
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Proxmox VE** 7.0+ with Ubuntu 24.04 cloud template
+- **Development Machine** with Linux, macOS, or WSL2
+- **SSH Key** for VM access
+- **API Token** for Proxmox authentication
+
+### Installation
+
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd k3s-proxmox-terragrunt
+
+# 2. Run setup (installs tools)
+./setup-terragrunt.sh
+
+# 3. Configure environment
+cp .envrc.example .envrc
+nano .envrc  # Add your credentials
+source .envrc
+
+# 4. Deploy cluster
+./deploy.sh dev
+
+# 5. Access cluster
+export KUBECONFIG=$(pwd)/kubeconfig
+kubectl get nodes
+```
+
+**[Detailed Setup Guide →](docs/README.md)**
+
+## 📊 Environment Comparison
+
+| Aspect | Development | Production |
+|--------|-------------|------------|
+| **Control Planes** | 1 node | 3 nodes (HA) |
+| **Workers** | 3 nodes | 5 nodes |
+| **vCPU** | 5 total | 22 total |
+| **RAM** | 10GB total | 44GB total |
+| **Storage** | 45GB total | 190GB total |
+| **VM IDs** | 500-503 | 600-607 |
+| **IP Range** | .180-.187 | .190-.199 |
+| **Use Case** | Development/Testing | Production Workloads |
+
+## 🛠️ Technology Stack
+
+### Infrastructure Layer
+- **[OpenTofu](https://opentofu.org/)** - Open-source IaC engine
+- **[Terragrunt](https://terragrunt.gruntwork.io/)** - DRY configuration wrapper
+- **[Proxmox Provider](https://registry.terraform.io/providers/Telmate/proxmox)** - VM automation
+
+### Configuration Layer
+- **[Ansible](https://www.ansible.com/)** - Configuration management
+- **[uv](https://github.com/astral-sh/uv)** - Fast Python package manager
+- **Python 3.12+** - Ansible runtime
+
+### Orchestration Layer
+- **[K3s](https://k3s.io/)** - Lightweight Kubernetes
+- **[Traefik](https://traefik.io/)** - Ingress controller (built-in)
+- **[ArgoCD](https://argo-cd.readthedocs.io/)** - GitOps (optional)
+
+## 📚 Documentation
+
+### Getting Started
+- **[Architecture Overview](docs/architecture/README.md)** - System design with diagrams
+- **[Deployment Flow](docs/architecture/deployment-flow.md)** - Deployment process
+- **[Documentation Index](docs/README.md)** - All documentation
+
+### Technical Guides
+- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Operations and deployment procedures
+
+## 🎯 Common Tasks
+
+### Deploy Cluster
+```bash
+# Development environment
+make apply ENV=dev
+
+# Production environment
+make apply ENV=prod
+```
+
+### Manage Infrastructure
+```bash
+make plan ENV=dev      # Preview changes
+make apply ENV=dev     # Apply changes
+make destroy ENV=dev   # Destroy cluster
+make outputs ENV=dev   # Show outputs
+make info ENV=dev      # Cluster information
+```
+
+### Access Cluster
+```bash
+# Set kubeconfig
+export KUBECONFIG=$(pwd)/kubeconfig
+
+# View nodes
+kubectl get nodes -o wide
+
+# View all pods
+kubectl get pods -A
+
+# SSH to control plane
+ssh ubuntu@192.168.1.180  # dev
+ssh ubuntu@192.168.1.190  # prod
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create `.envrc` from template:
+
+```bash
+# Proxmox Configuration
+export PROXMOX_API_URL="https://192.168.1.200:8006/api2/json"
+export PROXMOX_API_TOKEN_ID="root@pam!terraform"
+export PROXMOX_API_TOKEN_SECRET="your-secret-here"
+
+# SSH Configuration
+export SSH_PUBLIC_KEY="$(cat ~/.ssh/id_ed25519.pub)"
+
+# Environment Selection
+export TG_ENV="dev"  # or "prod"
+```
+
+### Customize Resources
+
+Edit `environments/{env}/terragrunt.hcl`:
+
+```hcl
+inputs = {
+  # Scale workers
+  worker_count = 5
+  
+  # Increase resources
+  worker_cpu = 2
+  worker_memory = 4096
+  
+  # Change K3s version
+  k3s_version = "v1.34.1+k3s1"
+}
+```
+
+## 🎨 Project Structure
+
+```
+k3s-proxmox-terragrunt/
+├── .ai-rules/              # AI assistant context
+├── ansible/                # Configuration management
+├── docs/                   # Documentation
+│   └── architecture/       # Architecture diagrams
+├── environments/           # Environment configs
+│   ├── dev/               # Development
+│   └── prod/              # Production
+├── modules/               # Terragrunt modules
+│   └── k3s-cluster/       # K3s cluster module
+├── deploy.sh              # Deployment script
+├── setup-terragrunt.sh    # Setup script
+├── Makefile               # Build automation
+└── terragrunt.hcl         # Root configuration
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Tools not found | Run `./setup-terragrunt.sh` |
+| Environment variables not set | Run `source .envrc` |
+| SSH connection failed | Wait longer for VMs to boot |
+| Terragrunt cache issues | Run `make clean` |
+
+**[Full Troubleshooting Guide →](docs/architecture/README.md)**
+
+## 🚦 CI/CD Integration
+
+GitHub Actions workflows included:
+
+- **Validation** - Terragrunt/Ansible syntax checking
+- **Security** - Dependency scanning
+- **Release** - Automated versioning
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file for details
+
+## 🙏 Acknowledgments
+
+Built with:
+- [OpenTofu](https://opentofu.org/) - Open-source IaC
+- [Terragrunt](https://terragrunt.gruntwork.io/) - DRY configuration
+- [K3s](https://k3s.io/) - Lightweight Kubernetes
+- [Ansible](https://www.ansible.com/) - Configuration management
+- [Proxmox VE](https://www.proxmox.com/) - Virtualization platform
+
+## 📞 Support
+
+- **Documentation**: [docs/README.md](docs/README.md)
+- **Issues**: GitHub Issues
+- **Discussions**: GitHub Discussions
+
+## 🗺️ Roadmap
+
+- [x] Terragrunt + OpenTofu migration
+- [x] Multi-environment support
+- [x] uv integration
+- [x] Comprehensive documentation
+- [x] Architecture diagrams
+- [ ] Remote state backend
+- [ ] Monitoring stack integration
+- [ ] Backup automation
+- [ ] Multi-cluster management
+
+---
+
+**[Get Started →](docs/README.md)** | **[View Architecture →](docs/architecture/README.md)** | **[Read Docs →](docs/README.md)**
 
 ## Architecture (Customizable)
 
@@ -188,7 +458,7 @@ k3s-proxmox-terraform/
 │   ├── release.yml              # Release automation workflow
 │   └── security.yml             # Security scanning workflow
 ├── deploy.sh                    # Automated deployment script
-├── setup.sh                     # Setup script
+├── setup-terragrunt.sh          # Setup script
 ├── .yamllint.yml                # YAML linting configuration
 └── README.md                    # This file
 ```

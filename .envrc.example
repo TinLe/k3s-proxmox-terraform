@@ -1,0 +1,14 @@
+# Environment variables for Terragrunt/OpenTofu
+# Copy this file to .envrc and update with your values
+# If using direnv, run: direnv allow
+
+# Proxmox Configuration
+export PROXMOX_API_URL="https://192.168.1.200:8006/api2/json"
+export PROXMOX_API_TOKEN_ID="root@pam!terraform"
+export PROXMOX_API_TOKEN_SECRET="your-token-secret-here"
+
+# SSH Configuration
+export SSH_PUBLIC_KEY="ssh-ed25519 YOUR_PUBLIC_KEY_HERE"
+
+# Environment (dev or prod)
+export TG_ENV="dev"

@@ -1,5 +1,6 @@
-# Terraform
+# Terraform/OpenTofu/Terragrunt
 .terraform/
+.terragrunt-cache/
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
@@ -51,3 +52,5 @@ Thumbs.db
 
 # local
 setenv.sh
+.envrc
+.env
