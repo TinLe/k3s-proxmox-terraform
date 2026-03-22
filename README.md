@@ -24,17 +24,17 @@ Deploy production-ready Kubernetes clusters on Proxmox VE with a single command.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Development Machine                       │
-│  ┌──────────┐  ┌──────────┐  ┌─────────┐  ┌──────────┐   │
-│  │Terragrunt│→ │ OpenTofu │→ │ Ansible │→ │   K3s    │   │
-│  └──────────┘  └──────────┘  └─────────┘  └──────────┘   │
+│                    Development Machine                      │
+│  ┌──────────┐  ┌──────────┐  ┌─────────┐  ┌──────────┐      │
+│  │Terragrunt│→ │ OpenTofu │→ │ Ansible │→ │   K3s    │      │
+│  └──────────┘  └──────────┘  └─────────┘  └──────────┘      │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                      Proxmox VE Host                         │
+│                      Proxmox VE Host                        │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  Dev: 1 CP + 3 Workers (5 vCPU, 10GB RAM)             │ │
-│  │  Prod: 3 CP + 5 Workers (22 vCPU, 44GB RAM) - HA      │ │
+│  │  Dev: 1 CP + 3 Workers (5 vCPU, 10GB RAM)              │ │
+│  │  Prod: 3 CP + 5 Workers (22 vCPU, 44GB RAM) - HA       │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -469,8 +469,8 @@ This project uses GitHub Actions for automated testing, security scanning, and r
 
 ### Workflow Status
 
-[![Validate Code](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/validate.yml/badge.svg)](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/validate.yml)
-[![Security Scan](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/security.yml/badge.svg)](https://github.com/your-username/k3s-proxmox-terraform/actions/workflows/security.yml)
+[![Validate Code](https://github.com/TinLe/k3s-proxmox-terraform/actions/workflows/validate.yml/badge.svg)](https://github.com/TinLe/k3s-proxmox-terraform/actions/workflows/validate.yml)
+[![Security Scan](https://github.com/TinLe/k3s-proxmox-terraform/actions/workflows/security.yml/badge.svg)](https://github.com/TinLe/k3s-proxmox-terraform/actions/workflows/security.yml)
 
 ### Development Workflow
 
@@ -843,3 +843,5 @@ For issues or questions:
 2. Review Terraform/Ansible logs
 3. Check Proxmox VE logs
 4. Consult K3s documentation
+
+## Originally forked from [heyvoon k3s-proxmox-terraform|https://github.com/heyvoon/k3s-proxmox-terraforma]
