@@ -844,4 +844,6 @@ For issues or questions:
 3. Check Proxmox VE logs
 4. Consult K3s documentation
 
-## Originally forked from [heyvoon k3s-proxmox-terraform|https://github.com/heyvoon/k3s-proxmox-terraforma]
+## Acknowledgement
+
+Originally forked from [heyvoon k3s-proxmox-terraform|https://github.com/heyvoon/k3s-proxmox-terraforma]
