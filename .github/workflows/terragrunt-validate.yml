@@ -1,0 +1,108 @@
+name: Validate Terragrunt Configuration
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'modules/**'
+      - 'environments/**'
+      - 'terragrunt.hcl'
+      - '*.hcl'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'modules/**'
+      - 'environments/**'
+      - 'terragrunt.hcl'
+      - '*.hcl'
+
+jobs:
+  validate:
+    name: Validate Terragrunt
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.8.5
+      
+      - name: Setup Terragrunt
+        run: |
+          wget -q https://github.com/gruntwork-io/terragrunt/releases/download/v0.68.16/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          terragrunt --version
+      
+      - name: Terragrunt Format Check
+        run: |
+          terragrunt hclfmt --terragrunt-check
+        continue-on-error: true
+      
+      - name: Terragrunt Init
+        run: |
+          cd environments/${{ matrix.environment }}
+          terragrunt init -backend=false
+        env:
+          PROXMOX_API_URL: "https://example.com:8006/api2/json"
+          PROXMOX_API_TOKEN_ID: "test@pam!test"
+          PROXMOX_API_TOKEN_SECRET: "test-secret"
+          SSH_PUBLIC_KEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI test@example.com"
+      
+      - name: Terragrunt Validate
+        run: |
+          cd environments/${{ matrix.environment }}
+          terragrunt validate
+        env:
+          PROXMOX_API_URL: "https://example.com:8006/api2/json"
+          PROXMOX_API_TOKEN_ID: "test@pam!test"
+          PROXMOX_API_TOKEN_SECRET: "test-secret"
+          SSH_PUBLIC_KEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI test@example.com"
+      
+      - name: Terragrunt Plan (Dry Run)
+        run: |
+          cd environments/${{ matrix.environment }}
+          terragrunt plan -lock=false
+        continue-on-error: true
+        env:
+          PROXMOX_API_URL: "https://example.com:8006/api2/json"
+          PROXMOX_API_TOKEN_ID: "test@pam!test"
+          PROXMOX_API_TOKEN_SECRET: "test-secret"
+          SSH_PUBLIC_KEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI test@example.com"
+
+  ansible-lint:
+    name: Lint Ansible Playbooks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Ansible and ansible-lint
+        run: |
+          pip install ansible ansible-lint
+      
+      - name: Run ansible-lint
+        run: |
+          cd ansible
+          ansible-lint *.yml
+        continue-on-error: true
+      
+      - name: Validate Ansible syntax
+        run: |
+          cd ansible
+          for playbook in *.yml; do
+            ansible-playbook --syntax-check "$playbook"
+          done
