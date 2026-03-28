@@ -31,6 +31,12 @@ variable "ssh_public_key" {
   type        = string
 }
 
+variable "ssh_private_key_path" {
+  description = "Path to SSH private key for VM provisioner connections"
+  type        = string
+  default     = "~/.ssh/id_ed25519"
+}
+
 variable "proxmox_node" {
   description = "Proxmox node name"
   type        = string

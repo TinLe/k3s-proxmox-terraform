@@ -13,6 +13,7 @@ resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/inventory.tpl", {
     control_planes = proxmox_vm_qemu.k3s_control_plane.*.default_ipv4_address
     workers        = proxmox_vm_qemu.k3s_worker.*.default_ipv4_address
+    k3s_version    = var.k3s_version
   })
   filename = "${path.cwd}/ansible/inventory.yml"
 }
@@ -90,7 +91,7 @@ resource "proxmox_vm_qemu" "k3s_control_plane" {
     type = "socket"
   }
 
-  ipconfig0 = "ip=${cidrhost("192.168.1.0/24", parseint(split(".", var.control_plane_ip_start)[3], 10) + count.index)}/24,gw=${var.gateway}"
+  ipconfig0 = "ip=${cidrhost("${join(".", slice(split(".", var.control_plane_ip_start), 0, 3))}.0/24", parseint(split(".", var.control_plane_ip_start)[3], 10) + count.index)}/24,gw=${var.gateway}"
 
   nameserver   = var.nameserver
   searchdomain = var.searchdomain
@@ -181,7 +182,7 @@ resource "proxmox_vm_qemu" "k3s_worker" {
     type = "socket"
   }
 
-  ipconfig0 = "ip=${cidrhost("192.168.1.0/24", parseint(split(".", var.worker_ip_start)[3], 10) + count.index)}/24,gw=${var.gateway}"
+  ipconfig0 = "ip=${cidrhost("${join(".", slice(split(".", var.worker_ip_start), 0, 3))}.0/24", parseint(split(".", var.worker_ip_start)[3], 10) + count.index)}/24,gw=${var.gateway}"
 
   nameserver   = var.nameserver
   searchdomain = var.searchdomain

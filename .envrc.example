@@ -10,5 +10,8 @@ export PROXMOX_API_TOKEN_SECRET="your-token-secret-here"
 # SSH Configuration
 export SSH_PUBLIC_KEY="ssh-ed25519 YOUR_PUBLIC_KEY_HERE"
 
+# Proxmox Storage Pool (default: local-zfs)
+export PROXMOX_STORAGE="local-zfs"
+
 # Environment (dev or prod)
 export TG_ENV="dev"
