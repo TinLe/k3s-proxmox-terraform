@@ -139,3 +139,9 @@ variable "k3s_token" {
   type        = string
   sensitive   = true
 }
+
+variable "proxmox_storage" {
+  description = "The name of the Proxmox storage pool"
+  type        = string
+  default     = "local-zfs" # Keep as default but allow override
+}

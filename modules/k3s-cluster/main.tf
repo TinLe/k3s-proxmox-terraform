@@ -8,6 +8,15 @@ locals {
   k3s_token = var.k3s_token != "" ? var.k3s_token : random_password.k3s_token.result
 }
 
+# keep worker_count updated in Ansible
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/inventory.tpl", {
+    control_planes = proxmox_vm_qemu.k3s_control_plane.*.default_ipv4_address
+    workers        = proxmox_vm_qemu.k3s_worker.*.default_ipv4_address
+  })
+  filename = "${path.cwd}/ansible/inventory.yml"
+}
+
 # Control Plane Nodes
 resource "proxmox_vm_qemu" "k3s_control_plane" {
   count = var.control_plane_count
@@ -17,6 +26,23 @@ resource "proxmox_vm_qemu" "k3s_control_plane" {
   clone       = var.template_id
   full_clone  = true
   vmid        = var.vm_id_start + count.index
+
+  # FIX: Increase timeout and ensure agent is ready before finishing
+  agent_timeout = 90
+
+  # Ensure the provider waits for the network to actually be up
+  force_create_timeout = 600
+
+  # Add a provisioner to "ping" the agent before Ansible starts
+  provisioner "remote-exec" {
+    inline = ["echo 'VM is up'"]
+    connection {
+      type     = "ssh"
+      user     = "ubuntu"
+      host     = self.default_ipv4_address
+      private_key = file(var.ssh_private_key_path)
+    }
+  }
 
   agent   = 1
   os_type = "cloud-init"
@@ -91,6 +117,23 @@ resource "proxmox_vm_qemu" "k3s_worker" {
   clone       = var.template_id
   full_clone  = true
   vmid        = var.vm_id_start + var.control_plane_count + count.index
+
+  # FIX: Increase timeout and ensure agent is ready before finishing
+  agent_timeout = 90
+
+  # Ensure the provider waits for the network to actually be up
+  force_create_timeout = 600
+
+  # Add a provisioner to "ping" the agent before Ansible starts
+  provisioner "remote-exec" {
+    inline = ["echo 'VM is up'"]
+    connection {
+      type     = "ssh"
+      user     = "ubuntu"
+      host     = self.default_ipv4_address
+      private_key = file(var.ssh_private_key_path)
+    }
+  }
 
   agent   = 1
   os_type = "cloud-init"
